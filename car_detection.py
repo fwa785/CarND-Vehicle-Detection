@@ -54,7 +54,7 @@ def find_cars(img, ystart, ystop, scale, svc, X_scaler, orient, pix_per_cell,
             test_prediction = svc.predict(test_features)
             test_score = svc.decision_function(test_features)
 
-            if (test_score > 0.5):
+            if (test_prediction == 1):
                 xbox_left = np.int(xleft*scale)
                 ytop_draw = np.int(ytop*scale)
                 win_draw = np.int(window*scale)

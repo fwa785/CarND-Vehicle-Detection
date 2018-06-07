@@ -38,9 +38,10 @@ for file in images:
     img = mpimg.imread(file)
 
     t = time.time()
-    subsample_img1, heat1 = find_cars(img, 400, 700, 2, svc, X_scaler, orient, pix_per_cell,
-                        cell_per_block, color_space, spatial_size, hist_bins, cells_per_step * 2)
-    subsample_img, heat2 = find_cars(subsample_img1, 350, 500, 1.5, svc, X_scaler, orient, pix_per_cell,
+
+    subsample_img1, heat1 = find_cars(img, 500, 650, 1.5, svc, X_scaler, orient, pix_per_cell,
+                        cell_per_block, color_space, spatial_size, hist_bins, cells_per_step)
+    subsample_img, heat2 = find_cars(subsample_img1, 400, 500, 1, svc, X_scaler, orient, pix_per_cell,
                         cell_per_block, color_space, spatial_size, hist_bins, cells_per_step)
 
     t2 = time.time()
