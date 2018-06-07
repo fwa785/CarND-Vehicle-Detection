@@ -102,7 +102,7 @@ def draw_vehicle_bboxes(img):
 
 def process_img(img):
 
-    subsample_img1, heat1 = find_cars(img, 500, 650, 1.5, svc, X_scaler, orient, pix_per_cell,
+    subsample_img1, heat1 = find_cars(img, 500, 650, 2, svc, X_scaler, orient, pix_per_cell,
                         cell_per_block, color_space, spatial_size, hist_bins, cells_per_step)
     subsample_img, heat2 = find_cars(subsample_img1, 400, 500, 1, svc, X_scaler, orient, pix_per_cell,
                         cell_per_block, color_space, spatial_size, hist_bins, cells_per_step)
