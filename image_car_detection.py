@@ -30,25 +30,29 @@ ystart = 350
 ystop = 500
 scale = 1
 cells_per_step = 2  # Instead of overlap, define how many cells to step
-heat_threshold = 1
+heat_threshold = 0
 
-images = glob.glob('test_images/*.jpg')
+images = glob.glob('video_clip/*.jpg')
 
 for file in images:
     img = mpimg.imread(file)
 
     t = time.time()
-    subsample_img, heat1 = find_cars(img, 400, 650, 1.5, svc, X_scaler, orient, pix_per_cell,
-                        cell_per_block, color_space, spatial_size, hist_bins, cells_per_step)
-    subsample_img, heat2 = find_cars(img, 300, 400, 1, svc, X_scaler, orient, pix_per_cell,
+    subsample_img1, heat1 = find_cars(img, 400, 700, 2, svc, X_scaler, orient, pix_per_cell,
+                        cell_per_block, color_space, spatial_size, hist_bins, cells_per_step * 2)
+    subsample_img, heat2 = find_cars(subsample_img1, 350, 500, 1.5, svc, X_scaler, orient, pix_per_cell,
                         cell_per_block, color_space, spatial_size, hist_bins, cells_per_step)
 
-    heat = heat1 + heat2
     t2 = time.time()
     print(round(t2-t, 2), 'Seconds to find cars with hog sub sampling windows')
 
     # apply threshold to heat
-    heat = apply_threshold(heat, heat_threshold)
+    heat1 = apply_threshold(heat1, heat_threshold)
+
+    # apply threshold to heat
+    heat2 = apply_threshold(heat2, heat_threshold)
+
+    heat = heat1 + heat2
 
     # Visualize the heapmap when display
     heatmap = np.clip(heat, 0, 255)
@@ -63,6 +67,9 @@ for file in images:
                         cell_per_block, color_space, spatial_size, hist_bins, cells_per_step, hog_channel)
     t2 = time.time()
     print(round(t2-t, 2), 'Seconds to search', num_windows, "windows")
+
+    plt.imshow(subsample_img)
+    plt.show()
 
     f, (ax1, ax2) = plt.subplots(1, 2)
     ax1.imshow(subsample_img)

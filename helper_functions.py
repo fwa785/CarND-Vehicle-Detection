@@ -189,6 +189,18 @@ def apply_threshold(heatmap, threshold):
     heatmap[heatmap <= threshold] = 0
     return heatmap
 
+def find_boxes_from_labels(labels):
+    boxes = []
+    for car_number in range(1, labels[1]+1):
+        nonzero = (labels[0] == car_number).nonzero()
+        nonzeroy = np.array(nonzero[0])
+        nonzerox = np.array(nonzero[1])
+
+        bbox = ((np.min(nonzerox), np.min(nonzeroy)), (np.max(nonzerox), np.max(nonzeroy)))
+        boxes.append(bbox)
+
+    return boxes
+
 def draw_labeled_bboxes(img, labels):
     for car_number in range(1, labels[1]+1):
         nonzero = (labels[0] == car_number).nonzero()
