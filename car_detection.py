@@ -1,8 +1,7 @@
 from helper_functions import *
 
-def find_cars(img, ystart, ystop, scale, svc, X_scaler, orient, pix_per_cell,
-              cell_per_block, color_space, spatial_size, hist_bins, cells_per_step):
-    heat = np.zeros_like(img[:, :, 0].astype(np.float))
+def find_cars(img, heat, ystart, ystop, scale, svc, X_scaler, orient, pix_per_cell,
+              cell_per_block, color_space, spatial_size, hist_bins, cells_per_step, box_color=(0, 0, 255)):
 
     draw_img = np.copy(img)
     img = img.astype(np.float32)/255
@@ -59,7 +58,7 @@ def find_cars(img, ystart, ystop, scale, svc, X_scaler, orient, pix_per_cell,
                 ytop_draw = np.int(ytop*scale)
                 win_draw = np.int(window*scale)
                 cv2.rectangle(draw_img, (xbox_left, ytop_draw+ystart), (xbox_left+win_draw, ytop_draw+win_draw+ystart),
-                (0,0,255), 6)
+                box_color, 6)
                 heat[ytop_draw+ystart:ytop_draw+win_draw+ystart, xbox_left:xbox_left+win_draw] += 1
 
     return draw_img, heat

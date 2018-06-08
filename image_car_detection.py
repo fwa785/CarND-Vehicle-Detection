@@ -29,8 +29,8 @@ hog_feat = svc_pickle["hog_feat"]
 ystart = 350
 ystop = 500
 scale = 1
-cells_per_step = 2  # Instead of overlap, define how many cells to step
-heat_threshold = 0
+cells_per_step = 1 # Instead of overlap, define how many cells to step
+heat_threshold = 4
 
 images = glob.glob('video_clip/*.jpg')
 
@@ -39,21 +39,19 @@ for file in images:
 
     t = time.time()
 
-    subsample_img1, heat1 = find_cars(img, 500, 650, 1.5, svc, X_scaler, orient, pix_per_cell,
-                        cell_per_block, color_space, spatial_size, hist_bins, cells_per_step)
-    subsample_img, heat2 = find_cars(subsample_img1, 400, 500, 1, svc, X_scaler, orient, pix_per_cell,
-                        cell_per_block, color_space, spatial_size, hist_bins, cells_per_step)
+    heat = np.zeros_like(img[:, :, 0].astype(np.float))
+
+    subsample_img  = img
+    subsample_img, heat = find_cars(subsample_img, heat, 500, 650, 2, svc, X_scaler, orient, pix_per_cell,
+                                      cell_per_block, color_space, spatial_size, hist_bins, cells_per_step)
+    subsample_img, heat = find_cars(subsample_img, heat, 400, 500, 1, svc, X_scaler, orient, pix_per_cell,
+                                     cell_per_block, color_space, spatial_size, hist_bins, cells_per_step)
 
     t2 = time.time()
     print(round(t2-t, 2), 'Seconds to find cars with hog sub sampling windows')
 
     # apply threshold to heat
-    heat1 = apply_threshold(heat1, heat_threshold)
-
-    # apply threshold to heat
-    heat2 = apply_threshold(heat2, heat_threshold)
-
-    heat = heat1 + heat2
+    heat = apply_threshold(heat, heat_threshold)
 
     # Visualize the heapmap when display
     heatmap = np.clip(heat, 0, 255)

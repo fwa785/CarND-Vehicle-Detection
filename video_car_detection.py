@@ -31,8 +31,8 @@ hog_feat = svc_pickle["hog_feat"]
 ystart = 400
 ystop = 656
 scale = 1.5
-cells_per_step = 2  # Instead of overlap, define how many cells to step
-heat_threshold = 1
+cells_per_step = 1  # Instead of overlap, define how many cells to step
+heat_threshold = 4
 group_heat_frames = 5
 vehicles = []
 frame_index = [0]
@@ -49,8 +49,6 @@ class Vehicle(object):
                         (self.position[1] - position[1])**2)
         if ( distance < 50):
             self.position = position
-            self.size = (int((self.size[0] + size[0])/2),
-                         int((self.size[1] + size[1])/2))
             self.size = size
             self.frame_count += 1
             self.last_found_frame_index = frame_index
@@ -89,7 +87,7 @@ def find_vehicles_from_labels(labels, frame_index):
 
 def draw_vehicle_bboxes(img):
     for vehicle in vehicles:
-        if ( vehicle.heat > 10):
+        if ( vehicle.heat > 8):
 
             pt1 = (int(vehicle.position[0] - vehicle.size[0]/2),
                    int(vehicle.position[1] - vehicle.size[1]/2))
@@ -102,24 +100,14 @@ def draw_vehicle_bboxes(img):
 
 def process_img(img):
 
-    subsample_img1, heat1 = find_cars(img, 500, 650, 2, svc, X_scaler, orient, pix_per_cell,
-                        cell_per_block, color_space, spatial_size, hist_bins, cells_per_step)
-    subsample_img, heat2 = find_cars(subsample_img1, 400, 500, 1, svc, X_scaler, orient, pix_per_cell,
-                        cell_per_block, color_space, spatial_size, hist_bins, cells_per_step)
+    heat = np.zeros_like(img[:, :, 0].astype(np.float))
 
+    subsample_img  = img
+    subsample_img, heat = find_cars(subsample_img, heat, 500, 650, 2, svc, X_scaler, orient, pix_per_cell,
+                                      cell_per_block, color_space, spatial_size, hist_bins, cells_per_step)
+    subsample_img, heat = find_cars(subsample_img, heat, 400, 500, 1, svc, X_scaler, orient, pix_per_cell,
+                                     cell_per_block, color_space, spatial_size, hist_bins, cells_per_step)
 
-    '''
-    # apply threshold to heat
-    heat1 = apply_threshold(heat1, heat_threshold)
-
-    # apply threshold to heat
-    heat2 = apply_threshold(heat2, heat_threshold)
-
-    # combined the heat
-    heat = heat1 + heat2
-    '''
-
-    heat = heat1 + heat2
     heat = apply_threshold(heat, heat_threshold)
 
     labels = label(heat)
