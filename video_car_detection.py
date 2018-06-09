@@ -28,11 +28,8 @@ hist_feat = svc_pickle["hist_feat"]
 hog_feat = svc_pickle["hog_feat"]
 
 
-ystart = 400
-ystop = 656
-scale = 1.5
 cells_per_step = 1  # Instead of overlap, define how many cells to step
-heat_threshold = 6
+heat_threshold = 4
 group_heat_threshold = 10
 vehicles = []
 
@@ -46,7 +43,7 @@ class Vehicle(object):
     def update_position(self, position, size):
         distance = math.sqrt((self.position[0] - position[0])**2 +
                         (self.position[1] - position[1])**2)
-        if ( distance < 50):
+        if ( distance < 30):
             self.position = position
             self.size = (int(self.size[0] * 0.8 + size[0] * 0.2),
                          int(self.size[1] * 0.8 + size[1] * 0.2))
@@ -56,7 +53,7 @@ class Vehicle(object):
         else:
             return False
     def increment_heat(self):
-        if (self.heat < group_heat_threshold * 1.5):
+        if (self.heat < group_heat_threshold * 4):
             self.heat += 1
     def decrement_heat(self):
         if (self.heat > 0):
@@ -110,11 +107,11 @@ def process_img(img):
 
     heat = np.zeros_like(img[:, :, 0].astype(np.float))
 
-    subsample_img  = img
-    subsample_img, heat = find_cars(subsample_img, heat, 500, 650, 2, svc, X_scaler, orient, pix_per_cell,
-                                      cell_per_block, color_space, spatial_size, hist_bins, cells_per_step)
-    subsample_img, heat = find_cars(subsample_img, heat, 400, 500, 1, svc, X_scaler, orient, pix_per_cell,
-                                     cell_per_block, color_space, spatial_size, hist_bins, cells_per_step)
+    subsample_img, heat = find_cars(img, heat, 350, 650, 2, svc, X_scaler, orient, pix_per_cell,
+                                    cell_per_block, color_space, spatial_size, hist_bins, cells_per_step)
+    subsample_img, heat = find_cars(img, heat, 400, 500, 1, svc, X_scaler, orient, pix_per_cell,
+                                    cell_per_block, color_space, spatial_size, hist_bins, cells_per_step,
+                                    box_color=(255, 0, 0))
 
     heat = apply_threshold(heat, heat_threshold)
 
@@ -131,3 +128,4 @@ video_output = 'output_videos/' + video_filename
 clip = VideoFileClip(video_filename)
 output_clip = clip.fl_image(process_img)
 output_clip.write_videofile(video_output, audio=False)
+

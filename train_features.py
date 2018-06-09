@@ -62,10 +62,10 @@ hist_feat = True
 hog_feat = True
 
 # get channel 1 hog features for a single image
-car_feature, car_hog_img = get_hog_features(convert_color(car_image, color_space)[:, :, 2], orient,
+car_feature, car_hog_img = get_hog_features(convert_color(car_image, color_space)[:, :, 0], orient,
                                             pix_per_cell, cell_per_block, vis=True, feature_vec=True)
 
-notcar_feature, notcar_hog_img = get_hog_features(convert_color(notcar_image, color_space)[:, :, 2], orient,
+notcar_feature, notcar_hog_img = get_hog_features(convert_color(notcar_image, color_space)[:, :, 0], orient,
                                             pix_per_cell, cell_per_block, vis=True, feature_vec=True)
 
 # display car and not car hog image
