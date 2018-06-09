@@ -32,35 +32,45 @@ ystart = 400
 ystop = 656
 scale = 1.5
 cells_per_step = 1  # Instead of overlap, define how many cells to step
-heat_threshold = 4
-group_heat_frames = 5
+heat_threshold = 6
+group_heat_threshold = 10
 vehicles = []
-frame_index = [0]
 
 class Vehicle(object):
-    def __init__(self, position, size, frame_index):
+    def __init__(self, position, size):
         self.position = position
         self.size = size
         self.frame_count = 1
-        self.last_found_frame_index = frame_index
         self.heat = 1
-    def update_position(self, position, size, frame_index):
+        self.found = True
+    def update_position(self, position, size):
         distance = math.sqrt((self.position[0] - position[0])**2 +
                         (self.position[1] - position[1])**2)
         if ( distance < 50):
             self.position = position
-            self.size = size
+            self.size = (int(self.size[0] * 0.8 + size[0] * 0.2),
+                         int(self.size[1] * 0.8 + size[1] * 0.2))
             self.frame_count += 1
-            self.last_found_frame_index = frame_index
+            self.found = True
             return True
         else:
             return False
+    def increment_heat(self):
+        if (self.heat < group_heat_threshold * 1.5):
+            self.heat += 1
+    def decrement_heat(self):
+        if (self.heat > 0):
+            self.heat -= 1
 
-def find_vehicles_from_labels(labels, frame_index):
+def find_vehicles_from_labels(labels):
 
     boxes = find_boxes_from_labels(labels)
-    frame_index[0] += 1
 
+    # First set all vehicles to not found
+    for vehicle in vehicles:
+        vehicle.found = False
+
+    # Search the vehicle matching the boxes being found
     for bbox in boxes:
 
         position = (int((bbox[0][0] + bbox[1][0])/2),
@@ -70,25 +80,23 @@ def find_vehicles_from_labels(labels, frame_index):
 
         vehicle_found = False
         for vehicle in vehicles:
-            if (vehicle.update_position(position, size, frame_index[0])):
+            if (vehicle.update_position(position, size)):
                 vehicle_found = True
-                if (vehicle.heat < 15):
-                    vehicle.heat += 1
+                vehicle.increment_heat()
                 break
 
         if (vehicle_found == False):
-            vehicle = Vehicle(position, size, frame_index[0])
+            vehicle = Vehicle(position, size)
             vehicles.append(vehicle)
 
+    # decrement the heat for vehicle if it's not found for this frame
     for vehicle in vehicles:
-        if (vehicle.last_found_frame_index < frame_index[0]):
-            if (vehicle.heat > 0):
-                vehicle.heat -= 1
+        if (vehicle.found == False):
+            vehicle.decrement_heat()
 
 def draw_vehicle_bboxes(img):
     for vehicle in vehicles:
-        if ( vehicle.heat > 8):
-
+        if ( vehicle.heat >= group_heat_threshold):
             pt1 = (int(vehicle.position[0] - vehicle.size[0]/2),
                    int(vehicle.position[1] - vehicle.size[1]/2))
             pt2 = (int(vehicle.position[0] + vehicle.size[0]/2),
@@ -112,11 +120,9 @@ def process_img(img):
 
     labels = label(heat)
 
-    find_vehicles_from_labels(labels, frame_index)
+    find_vehicles_from_labels(labels)
 
     draw_img = draw_vehicle_bboxes(np.copy(img))
-    #draw_img = draw_labeled_bboxes(np.copy(img), labels)
-
 
     return draw_img
 

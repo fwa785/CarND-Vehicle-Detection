@@ -32,7 +32,7 @@ scale = 1
 cells_per_step = 1 # Instead of overlap, define how many cells to step
 heat_threshold = 4
 
-images = glob.glob('video_clip/*.jpg')
+images = glob.glob('test_img/*.jpg')
 
 for file in images:
     img = mpimg.imread(file)
