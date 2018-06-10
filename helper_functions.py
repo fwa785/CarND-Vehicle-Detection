@@ -19,13 +19,10 @@ def convert_color(img, color_space='RGB'):
         return np.copy(img)
 
 def draw_boxes(img, bboxes, color=(0,0,255), thick=6):
-    # make a copy of the image
-    draw_img = np.copy(img)
-
     for box in bboxes:
-        cv2.rectangle(draw_img, box[0], box[1], color, thickness=thick)
+        cv2.rectangle(img, box[0], box[1], color, thickness=thick)
 
-    return draw_img
+    return img
 
 def get_hog_features(img, orient, pix_per_cell, cell_per_block, vis=True,
                      feature_vec=True):

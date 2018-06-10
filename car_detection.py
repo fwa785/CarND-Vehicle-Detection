@@ -1,7 +1,8 @@
 from helper_functions import *
 
 def find_cars(img, heat, ystart, ystop, scale, svc, X_scaler, orient, pix_per_cell,
-              cell_per_block, color_space, spatial_size, hist_bins, cells_per_step, box_color=(0, 0, 255)):
+              cell_per_block, color_space, spatial_size, hist_bins, cells_per_step, box_color=(0, 0, 255),
+              show_all_windows=False):
 
     draw_img = np.copy(img)
     img = img.astype(np.float32)/255
@@ -53,19 +54,20 @@ def find_cars(img, heat, ystart, ystop, scale, svc, X_scaler, orient, pix_per_ce
             test_prediction = svc.predict(test_features)
             test_score = svc.decision_function(test_features)
 
-            if (test_prediction == 1):
+            if (test_prediction == 1 or show_all_windows):
                 xbox_left = np.int(xleft*scale)
                 ytop_draw = np.int(ytop*scale)
                 win_draw = np.int(window*scale)
                 cv2.rectangle(draw_img, (xbox_left, ytop_draw+ystart), (xbox_left+win_draw, ytop_draw+win_draw+ystart),
                 box_color, 6)
-                heat[ytop_draw+ystart:ytop_draw+win_draw+ystart, xbox_left:xbox_left+win_draw] += 1
+                if (test_prediction == 1):
+                    heat[ytop_draw+ystart:ytop_draw+win_draw+ystart, xbox_left:xbox_left+win_draw] += 1
 
     return draw_img, heat
 
 def window_search_cars(img, ystart, ystop, scale, svc, X_scaler, orient, pix_per_cell,
-              cell_per_block, color_space, spatial_size, hist_bins, cells_per_step,
-                       hog_channel):
+                       cell_per_block, color_space, spatial_size, hist_bins, cells_per_step,
+                       hog_channel, draw_all_windows=False):
     draw_img = np.copy(img)
     img = img.astype(np.float32)/255
 
@@ -83,7 +85,10 @@ def window_search_cars(img, ystart, ystop, scale, svc, X_scaler, orient, pix_per
                                  hog_channel=hog_channel, spatial_feat=True,
                                  hist_feat=True, hog_feat=True)
 
-    draw_img = draw_boxes(draw_img, hot_windows, color=(0,0,255), thick=6)
+    if (draw_all_windows):
+        draw_img = draw_boxes(draw_img, windows, color=(0, 0, 255), thick=6)
+    else:
+        draw_img = draw_boxes(draw_img, hot_windows, color=(0, 0,255), thick=6)
 
     return draw_img, len(windows)
 
